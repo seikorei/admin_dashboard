@@ -18,6 +18,7 @@ export async function GET() {
       {
         success: false,
         error: error.message,
+        debug_host: process.env.DB_HOST || "not set"
       },
       { status: 500 }
     );
