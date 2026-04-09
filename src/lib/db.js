@@ -3,14 +3,19 @@ import mysql from "mysql2/promise";
 let globalPool = null;
 
 export function getDb() {
-  if (!process.env.DB_HOST || !process.env.DB_PORT) {
+  const host = process.env.DB_HOST;
+  const port = process.env.DB_PORT;
+
+  if (!host || !port) {
+    console.error("[DB] Missing host or port environment variables.");
     return null; 
   }
 
   if (!globalPool) {
+    console.log(`[DB] Connecting to ${host.substring(0, 3)}...${host.substring(host.length - 4)}:${port}`);
     globalPool = mysql.createPool({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
+      host: host,
+      port: Number(port),
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
