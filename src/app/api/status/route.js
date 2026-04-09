@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 import { db } from "@/lib/db";
 
 const DEFAULT_STATUSES = ["Pending", "Processing", "Shipped", "Paid", "Cancelled"];
