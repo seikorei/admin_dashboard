@@ -12,7 +12,7 @@ export function getDb() {
   }
 
   if (!globalPool) {
-    console.log(`[DB] Connecting to ${host.substring(0, 3)}...${host.substring(host.length - 4)}:${port}`);
+    console.log(`[DB] Initializing pool for ${host}:${port}`);
     globalPool = mysql.createPool({
       host: host,
       port: Number(port),
@@ -22,6 +22,9 @@ export function getDb() {
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
+      ssl: {
+        rejectUnauthorized: false // Required for Railway and many managed DBs
+      }
     });
   }
   return globalPool;
