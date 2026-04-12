@@ -8,7 +8,7 @@ async function checkData() {
         database: "admin_dashboard"
     });
 
-    const [rows] = await db.query("SELECT id, product_name, category, image_url FROM products");
+    const [rows] = await db.query("SELECT id, name, category, image_url FROM products");
     console.log("Current Products in DB:");
     console.table(rows);
 
