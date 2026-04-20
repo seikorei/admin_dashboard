@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TopBar } from "@/components/TopBar";
+import TopBar from "@/components/TopBar";
 import { Mail, Clock, ShieldAlert, Loader2, RefreshCw } from "lucide-react";
 
 interface Message {
