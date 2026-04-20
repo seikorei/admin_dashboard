@@ -43,12 +43,12 @@ export async function POST(req) {
     console.log("Received at:", new Date().toISOString());
     console.log("===========================");
 
-    // Optional: save to DB — uncomment if needed
-    // const { db } = await import("@/lib/db");
-    // await db.query(
-    //   "INSERT INTO contact_messages (name, email, message, created_at) VALUES (?, ?, ?, NOW())",
-    //   [name.trim(), email.trim().toLowerCase(), message.trim()]
-    // );
+    // Save to DB
+    const { db } = await import("@/lib/db");
+    await db.query(
+      "INSERT INTO messages (name, email, message) VALUES (?, ?, ?)",
+      [name.trim(), email.trim().toLowerCase(), message.trim()]
+    );
 
     return NextResponse.json({
       success: true,

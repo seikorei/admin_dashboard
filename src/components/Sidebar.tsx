@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Truck, Package,
-  Settings, Settings2, LogOut, User,
+  Settings, Settings2, LogOut, User, Mail
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,6 +15,7 @@ const menuItems = [
   { name: "Sales Order",    icon: ShoppingCart,    href: "/admin/orders"      },
   { name: "Delivery Order", icon: Truck,           href: "/delivery"        },
   { name: "Inventory",      icon: Package,         href: "/inventory"       },
+  { name: "Messages",       icon: Mail,            href: "/admin/messages"  },
   { name: "Settings",       icon: Settings,        href: "/settings"        },
 ];
 
