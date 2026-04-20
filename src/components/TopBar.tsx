@@ -5,7 +5,7 @@ import { Bell, Search, Package } from "lucide-react";
 import { getAdminUser } from "@/lib/adminAuth";
 import Link from "next/link";
 
-export default function TopBar() {
+export default function TopBar({ title }: { title?: string }) {
   const [admin, setAdmin] = useState<{ name: string; email: string } | null>(null);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [showAlerts, setShowAlerts] = useState(false);
@@ -34,6 +34,13 @@ export default function TopBar() {
 
   return (
     <header className="h-14 flex items-center gap-4 px-6 border-b border-zinc-200 dark:border-slate-800 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-sm shrink-0 relative">
+      {/* Title (Optional) */}
+      {title && (
+        <h1 className="text-sm font-bold text-zinc-900 dark:text-white mr-4">
+          {title}
+        </h1>
+      )}
+
       {/* Global search */}
       <div className="relative flex-1 max-w-xs hidden sm:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500 dark:text-slate-400" />
