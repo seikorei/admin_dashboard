@@ -8,7 +8,7 @@ import StoreNavbar from "./StoreNavbar";
 import { CartProvider } from "@/context/CartContext";
 
 // Routes that use the store (customer-facing) layout
-const STORE_ROUTES = ["/home", "/shop", "/cart", "/checkout", "/login", "/register", "/about", "/contact", "/account"];
+const STORE_ROUTES = ["/home", "/shop", "/cart", "/checkout", "/login", "/register", "/about", "/contact", "/account", "/forgot-password"];
 
 // Admin routes that DON'T need auth protection (the login page itself)
 const ADMIN_PUBLIC = ["/admin/login"];

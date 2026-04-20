@@ -26,7 +26,14 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (data.success) {
-        router.push("/login");
+        // Auto-login
+        localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.token) {
+          localStorage.setItem("userToken", data.token);
+        }
+        window.dispatchEvent(new Event("userChanged"));
+        // Redirect to account
+        router.push("/account");
       } else {
         setError(data.error || "Registration failed");
       }

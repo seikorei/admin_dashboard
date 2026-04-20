@@ -12,7 +12,11 @@ export async function GET() {
       SELECT
         d.id,
         COALESCE(d.delivery_id, CONCAT('#DEL-', LPAD(d.id, 4, '0'))) AS delivery_id,
-        COALESCE(d.order_id, '')                                        AS orderId,
+        CASE 
+          WHEN o.order_id IS NOT NULL AND o.order_id != '' THEN o.order_id 
+          ELSE CONCAT('#ORD-', LPAD(o.id, 4, '0')) 
+        END                                                             AS displayOrderId,
+        d.order_id                                                      AS orderDbId,
         COALESCE(d.customer, 'Unknown')                                 AS customer,
         COALESCE(d.address, '')                                         AS address,
         COALESCE(d.carrier, 'DHL')                                      AS carrier,
@@ -33,8 +37,8 @@ export async function GET() {
     const mapped = rows.map(r => ({
       id:           r.delivery_id,
       dbId:         r.id,
-      orderId:      r.orderId ? `#ORD-${String(r.orderId).padStart(4, "0")}` : "",
-      orderDbId:    r.orderId,
+      orderId:      r.displayOrderId,
+      orderDbId:    r.orderDbId,
       customer:     r.customer,
       address:      r.address,
       carrier:      r.carrier,

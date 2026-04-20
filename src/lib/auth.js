@@ -7,6 +7,7 @@ export function getUser() {
 export function logout() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("user");
+    localStorage.removeItem("userToken");
     window.location.href = "/home";
   }
 }

@@ -97,10 +97,22 @@ export async function POST(req) {
     const body = await req.json();
 
     if (Array.isArray(body.items)) {
+      console.log("[DEBUG] Order Body:", JSON.stringify(body, null, 2));
       const { userId, items, total, paymentId, customerName: providedName, email, city, address } = body;
 
-      if (!providedName || !email || !city || !address) {
-        return NextResponse.json({ success: false, error: "Missing checkout details. Full Info is required." }, { status: 400 });
+      // More robust validation: Log exactly what is missing
+      const missing = [];
+      if (!providedName) missing.push("customerName");
+      if (!email) missing.push("email");
+      if (!city) missing.push("city");
+      if (!address) missing.push("address");
+
+      if (missing.length > 0) {
+        console.error("[ERROR] Missing fields during checkout:", missing.join(", "));
+        return NextResponse.json({ 
+          success: false, 
+          error: `Missing checkout details: ${missing.join(", ")}. Please ensure your profile or form is complete.` 
+        }, { status: 400 });
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return NextResponse.json({ success: false, error: "Invalid email format" }, { status: 400 });
@@ -120,8 +132,8 @@ export async function POST(req) {
       }
 
       const [orderResult] = await db.query(
-        `INSERT INTO orders (user_id, amount, status, customer, email, city, address, order_date, created_at) VALUES (?, ?, 'Paid', ?, ?, ?, ?, NOW(), NOW())`,
-        [userId || null, total, customerName, email || "", city || "", address || ""]
+        `INSERT INTO orders (order_id, user_id, amount, status, customer, email, city, address, order_date, created_at) VALUES (?, ?, ?, 'Paid', ?, ?, ?, ?, NOW(), NOW())`,
+        [paymentId || `ORD-${Date.now()}`, userId || null, total, customerName, email || "", city || "", address || ""]
       );
       const orderId = orderResult.insertId;
       for (const item of items) {
@@ -136,10 +148,14 @@ export async function POST(req) {
         const eta = new Date();
         eta.setDate(eta.getDate() + 3);
         const etaStr = eta.toISOString().split("T")[0];
+        
+        // Generate a temporary unique ID for the NOT NULL constraint, then we'll update it to the formatted one
+        const tempDelId = `DEL-${Date.now()}`;
+
         const [delRes] = await db.query(
-          `INSERT INTO deliveries (order_id, customer, address, carrier, status, eta, items_count, created_at)
-           VALUES (?, ?, ?, 'DHL', 'Processing', ?, ?, NOW())`,
-          [orderId, customerName, address || "", etaStr, items.length]
+          `INSERT INTO deliveries (delivery_id, order_id, customer, address, carrier, status, eta, items_count, created_at)
+           VALUES (?, ?, ?, ?, 'DHL', 'Processing', ?, ?, NOW())`,
+          [tempDelId, orderId, customerName, address || "", etaStr, items.length]
         );
         const delId = delRes.insertId;
         await db.query(
@@ -160,8 +176,8 @@ export async function POST(req) {
     }
     const numericAmount = parseFloat(String(amount).replace(/[^0-9.]/g, "")) || 0;
     const [result] = await db.query(
-      `INSERT INTO orders (customer, order_date, status, amount, created_at) VALUES (?, ?, ?, ?, NOW())`,
-      [customer, order_date || new Date().toISOString().split("T")[0], status || "Pending", numericAmount]
+      `INSERT INTO orders (order_id, customer, order_date, status, amount, created_at) VALUES (?, ?, ?, ?, ?, NOW())`,
+      [`ORD-AM-${Date.now()}`, customer, order_date || new Date().toISOString().split("T")[0], status || "Pending", numericAmount]
     );
     const newId = result.insertId;
 
@@ -171,10 +187,12 @@ export async function POST(req) {
         const eta = new Date();
         eta.setDate(eta.getDate() + 3);
         const etaStr = eta.toISOString().split("T")[0];
+        const tempDelId = `DEL-AM-${Date.now()}`;
+        
         const [delRes] = await db.query(
-          `INSERT INTO deliveries (order_id, customer, address, carrier, status, eta, items_count, created_at)
-           VALUES (?, ?, '', 'DHL', 'Processing', ?, 1, NOW())`,
-          [newId, customer, etaStr]
+          `INSERT INTO deliveries (delivery_id, order_id, customer, address, carrier, status, eta, items_count, created_at)
+           VALUES (?, ?, ?, '', 'DHL', 'Processing', ?, 1, NOW())`,
+          [tempDelId, newId, customer, etaStr]
         );
         const delId = delRes.insertId;
         await db.query(

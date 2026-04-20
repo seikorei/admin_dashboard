@@ -28,10 +28,17 @@ export default function LoginPage() {
       if (data.success) {
         // Store user in session
         localStorage.setItem("user", JSON.stringify(data.user));
+        if (data.token) {
+          localStorage.setItem("userToken", data.token);
+        }
         // Notify same-tab listeners (navbar, etc.)
         window.dispatchEvent(new Event("userChanged"));
-        // Redirect to account page
-        router.push("/account");
+        // Redirect based on role
+        if (data.user.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/account");
+        }
       } else {
         setError(data.error || "Login failed");
       }
@@ -84,7 +91,7 @@ export default function LoginPage() {
               <input type="checkbox" className="rounded focus:ring-blue-500 text-blue-600" />
               <span className="text-sm text-zinc-600">Remember me</span>
             </label>
-            <Link href="#" className="text-sm font-bold text-blue-600 hover:text-blue-500 transition-colors">Forgot password?</Link>
+            <Link href="/forgot-password" className="text-sm font-bold text-blue-600 hover:text-blue-500 transition-colors">Forgot password?</Link>
           </div>
           <button 
             disabled={loading}

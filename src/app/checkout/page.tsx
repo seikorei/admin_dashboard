@@ -24,9 +24,10 @@ export default function CheckoutPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const errors: Record<string, string> = {};
-  if (!user) {
-    if (!formData.email.trim()) errors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = "Invalid email format";
+  if (!formData.email.trim()) {
+    errors.email = "Email is required";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    errors.email = "Invalid email format";
   }
   if (!formData.firstName.trim()) errors.firstName = "First name is required";
   if (!formData.lastName.trim()) errors.lastName = "Last name is required";
@@ -67,37 +68,55 @@ export default function CheckoutPage() {
   }, [loading, cartItems.length, total]);
 
   const saveOrder = async (paymentId: string) => {
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user?.id,
+        items: cartItems,
+        total: total,
+        paymentId,
+        customerName: (`${formData.firstName} ${formData.lastName}`.trim()) || user?.name || "Guest",
+        email: user?.email || formData.email || "",
+        city: formData.city || "",
+        address: `${formData.street || ""}, ${formData.zip || ""}`,
+      }),
+    });
+    
+    // Always parse JSON to see if the server returned a descriptive error message
+    let data;
     try {
-      await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user?.id,
-          items: cartItems,
-          total: total,
-          paymentId,
-          customerName: `${formData.firstName} ${formData.lastName}`.trim(),
-          email: user ? user.email : formData.email,
-          city: formData.city,
-          address: `${formData.street}, ${formData.zip}`,
-        }),
-      });
-    } catch (err) {
-      console.error("Failed to save order:", err);
+        data = await res.json();
+    } catch (e) {
+        throw new Error("Server error, order could not be placed (invalid JSON response).");
     }
+
+    if (!res.ok || !data.success) {
+        throw new Error(data.error || data.message || "Failed to create order in database.");
+    }
+    
+    return data;
   };
 
   const handlePayPalApprove = async (details: any) => {
-    await saveOrder(details.id || "paypal-" + Date.now());
-    clearCart();
-    window.location.href = "/account";
+    try {
+        await saveOrder(details.id || "paypal-" + Date.now());
+        clearCart();
+        window.location.href = "/account";
+    } catch (err: any) {
+        alert("Payment was captured, but there was an error saving your order: " + err.message);
+    }
   };
 
   const handleSimulatePayment = async () => {
     if (cartItems.length === 0) { alert("Your cart is empty."); return; }
-    await saveOrder("simulated-" + Date.now());
-    clearCart();
-    setSuccess(true);
+    try {
+        await saveOrder("simulated-" + Date.now());
+        clearCart();
+        setSuccess(true);
+    } catch (err: any) {
+        alert("Simulation failed: " + err.message);
+    }
   };
 
   if (loading) {
@@ -157,26 +176,16 @@ export default function CheckoutPage() {
                   Contact Information
                 </h2>
                 <div className="pl-12">
-                  {user ? (
-                    <input
-                      type="email"
-                      value={user.email}
-                      disabled
-                      className="w-full px-5 py-4 bg-zinc-50 border border-zinc-200 text-zinc-500 rounded-2xl outline-none cursor-not-allowed"
-                    />
-                  ) : (
-                    <>
-                      <input
-                        type="email"
-                        placeholder="Email Address"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        onBlur={() => handleBlur("email")}
-                        className={`w-full px-5 py-4 bg-white border ${touched.email && errors.email ? "border-red-500" : "border-zinc-200"} text-zinc-900 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none`}
-                      />
-                      {touched.email && errors.email && <p className="text-red-500 text-xs font-bold mt-2 ml-1">{errors.email}</p>}
-                    </>
-                  )}
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onBlur={() => handleBlur("email")}
+                    disabled={!!(user && user.email)}
+                    className={`w-full px-5 py-4 ${user && user.email ? "bg-zinc-50 text-zinc-500 cursor-not-allowed" : "bg-white text-zinc-900"} border ${touched.email && errors.email ? "border-red-500" : "border-zinc-200"} rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none`}
+                  />
+                  {touched.email && errors.email && <p className="text-red-500 text-xs font-bold mt-2 ml-1">{errors.email}</p>}
                 </div>
               </section>
 

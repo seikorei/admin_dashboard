@@ -28,10 +28,11 @@ async function ensureDelivery(orderId, customer) {
   );
   const orderAddress = orderRow?.address || "";
 
+  const tempDelId = `DEL-SN-${Date.now()}`;
   const [res] = await db.query(
-    `INSERT INTO deliveries (order_id, customer, address, carrier, status, eta, items_count, created_at)
-     VALUES (?, ?, ?, 'DHL', 'Processing', ?, ?, NOW())`,
-    [orderId, customer || "Unknown", orderAddress, etaStr, Math.max(1, Number(cnt))]
+    `INSERT INTO deliveries (delivery_id, order_id, customer, address, carrier, status, eta, items_count, created_at)
+     VALUES (?, ?, ?, ?, 'DHL', 'Processing', ?, ?, NOW())`,
+    [tempDelId, orderId, customer || "Unknown", orderAddress, etaStr, Math.max(1, Number(cnt))]
   );
   const newId = res.insertId;
   await db.query(

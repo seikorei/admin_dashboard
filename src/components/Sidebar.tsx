@@ -12,7 +12,7 @@ import { getAdminUser, adminLogout } from "@/lib/adminAuth";
 
 const menuItems = [
   { name: "Dashboard",      icon: LayoutDashboard, href: "/admin/dashboard" },
-  { name: "Sales Order",    icon: ShoppingCart,    href: "/sales"           },
+  { name: "Sales Order",    icon: ShoppingCart,    href: "/admin/orders"      },
   { name: "Delivery Order", icon: Truck,           href: "/delivery"        },
   { name: "Inventory",      icon: Package,         href: "/inventory"       },
   { name: "Settings",       icon: Settings,        href: "/settings"        },
@@ -54,7 +54,7 @@ export default function Sidebar() {
       </button>
 
       {/* ── Navigation ──────────────────────────────────── */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden pt-2">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden pt-2 scrollbar-hide">
         <ul className="space-y-1 px-2">
           {menuItems.map((item) => {
             const isActive =
@@ -69,11 +69,11 @@ export default function Sidebar() {
                   className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium
                     transition-all duration-150
                     ${isActive
-                      ? "bg-[#3b82f6] text-white shadow-md"
+                      ? "bg-[#3b82f6] text-white shadow-md font-bold"
                       : "text-slate-400 hover:bg-[#0f172a] hover:text-slate-200"}
                     ${isCollapsed ? "justify-center" : ""}`}
                 >
-                  <item.icon className="h-5 w-5 shrink-0" />
+                  <item.icon className={`h-5 w-5 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`} />
                   {!isCollapsed && (
                     <span className="whitespace-nowrap overflow-hidden">{item.name}</span>
                   )}
@@ -84,17 +84,17 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      {/* ── Admin info + logout ──────────────────────────── */}
-      <div className="border-t border-slate-800 px-2 py-3 space-y-1">
+      {/* ── Admin info + logout (Pinned to bottom) ───────── */}
+      <div className="mt-auto border-t border-slate-800/60 bg-[#020617] px-2 py-4 space-y-1.5 shrink-0">
         {/* Admin profile row */}
         {!isCollapsed && admin && (
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#0f172a]">
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-900/50 border border-slate-800/40 shadow-sm mb-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
               <User className="h-4 w-4 text-white" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-200 leading-tight truncate">{admin.name}</p>
-              <p className="text-[10px] text-slate-500 truncate">{admin.email}</p>
+              <p className="text-xs font-black text-slate-100 leading-tight truncate uppercase tracking-tighter">{admin.name}</p>
+              <p className="text-[10px] text-slate-500 truncate font-medium">{admin.email}</p>
             </div>
           </div>
         )}
@@ -103,12 +103,12 @@ export default function Sidebar() {
         <button
           onClick={adminLogout}
           title="Logout"
-          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium
-            text-slate-400 hover:bg-rose-950/50 hover:text-rose-400 transition-all duration-150
+          className={`group flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm font-bold
+            text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all duration-200
             ${isCollapsed ? "justify-center" : ""}`}
         >
-          <LogOut className="h-5 w-5 shrink-0" />
-          {!isCollapsed && <span>Logout</span>}
+          <LogOut className="h-5 w-5 shrink-0 group-hover:rotate-12 transition-transform" />
+          {!isCollapsed && <span>Logout Account</span>}
         </button>
       </div>
     </div>

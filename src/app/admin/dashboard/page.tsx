@@ -167,7 +167,7 @@ function OrdersPreview() {
     <div className="rounded-xl border p-4">
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-bold">Recent Orders</h2>
-        <a href="/sales" className="text-blue-500 text-sm underline">
+        <a href="/admin/orders" className="text-blue-500 text-sm underline">
           View All →
         </a>
       </div>
