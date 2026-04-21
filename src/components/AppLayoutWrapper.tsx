@@ -64,12 +64,15 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
   }
 
   return (
-    <div style={{ display: "flex", width: "100%", minHeight: "100vh", overflowY: "auto" }}>
+    <div className="flex h-screen w-full overflow-hidden bg-zinc-50 dark:bg-[#020617] transition-colors duration-300">
+      {/* Sidebar is fixed on the left (it handles its own width/expand state inside) */}
       <Sidebar />
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+      
+      {/* Main content area takes remaining space and scrolls independently */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopBar />
-        <main style={{ flex: 1, padding: "2rem" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
